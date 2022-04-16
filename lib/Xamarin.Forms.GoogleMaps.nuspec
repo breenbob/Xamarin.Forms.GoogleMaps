@@ -3,20 +3,20 @@
 	<metadata minClientVersion="2.8.3">
 		<id>Xamarin.Forms.GoogleMaps</id>
 		<title>Xamarin.Forms.GoogleMaps</title>
-		<version>4.0.0-BETA1</version>
+		<version>4.0.1</version>
 		<releaseNotes>
-# 4.0.0-BETA1
+# 4.0.1
 
 - Supports latest SDK's
 
 full release notes is here - https://github.com/amay077/Xamarin.Forms.GoogleMaps/blob/master/RELEASE_NOTES.md
 		</releaseNotes>
-		<authors>amay077</authors>
-		<copyright>Copyright 2016-2020</copyright>
+		<authors>Conor Breen</authors>
+		<copyright>Copyright 2016-2022</copyright>
 		<license type="file">LICENSE.txt</license>
-    <projectUrl>https://github.com/amay077/Xamarin.Forms.GoogleMaps</projectUrl>
+    <projectUrl>https://github.com/breenbob/Xamarin.Forms.GoogleMaps</projectUrl>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
-		<description>Yet another Maps library for Xamarin.Forms that optimized for Google maps.</description>
+		<description>Fork of amay077's Xamarin.Forms.GoogleMaps repo patched to fix Pins bindable property.</description>
 		<summary>Yet another Maps library for Xamarin.Forms that optimized for Google maps</summary>
 		<tags>xamarin forms maps xamarinforms xamarinformsmaps xamarin.forms.maps xamarinformsgooglemaps xamarin.forms.googlemaps google googlemap</tags>
 	<dependencies>

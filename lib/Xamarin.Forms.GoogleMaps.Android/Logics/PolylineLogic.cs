@@ -41,10 +41,10 @@ namespace Xamarin.Forms.GoogleMaps.Logics.Android
             foreach (var p in outerItem.Positions)
                 opts = opts.Add(new LatLng(p.Latitude, p.Longitude));
 
-            opts = opts.InvokeWidth(outerItem.StrokeWidth * this.ScaledDensity); // TODO: convert from px to pt. Is this collect? (looks like same iOS Maps)
-            opts = opts.InvokeColor(outerItem.StrokeColor.ToAndroid());
-            opts = opts.Clickable(outerItem.IsClickable);
-            opts = opts.InvokeZIndex(outerItem.ZIndex);
+            opts = opts.InvokeWidth(outerItem.StrokeWidth * this.ScaledDensity)
+                .InvokeColor(outerItem.StrokeColor.ToAndroid())
+                .Clickable(outerItem.IsClickable)
+                .InvokeZIndex(outerItem.ZIndex);
 
             var nativePolyline = NativeMap.AddPolyline(opts);
 

@@ -236,6 +236,11 @@ namespace Xamarin.Forms.GoogleMaps.Android
                 _cameraLogic.MoveCamera(Map.InitialCameraUpdate);
             }
 
+            if (Map?.NewCameraUpdate != null)
+            {
+                _cameraLogic.MoveCamera(Map.NewCameraUpdate);
+            }
+
             foreach (var logic in Logics)
             {
                 if (logic.Map != null)

@@ -9,6 +9,7 @@ using Xamarin.Forms.GoogleMaps.Android.Factories;
 using Xamarin.Forms.GoogleMaps.Android;
 using Android.Widget;
 using Android.Content;
+using System.Threading.Tasks;
 
 namespace Xamarin.Forms.GoogleMaps.Logics.Android
 {
@@ -20,7 +21,7 @@ namespace Xamarin.Forms.GoogleMaps.Logics.Android
         private readonly IBitmapDescriptorFactory _bitmapDescriptorFactory;
 
         public GroundOverlayLogic(
-            Context context, 
+            Context context,
             IBitmapDescriptorFactory bitmapDescriptorFactory)
         {
             _context = context;
@@ -66,7 +67,7 @@ namespace Xamarin.Forms.GoogleMaps.Logics.Android
             if (outerItem?.Icon?.Type == BitmapDescriptorType.View)
             {
                 overlay.Visible = false; // Will become visible once the iconview is ready.
-                TransformXamarinViewToAndroidBitmap(outerItem, overlay);
+                _ = TransformXamarinViewToAndroidBitmap(outerItem, overlay);
             }
             else
             {
@@ -89,7 +90,7 @@ namespace Xamarin.Forms.GoogleMaps.Logics.Android
             return nativeOverlay;
         }
 
-        void OnGroundOverlayClick(object sender, GoogleMap.GroundOverlayClickEventArgs e)
+        private void OnGroundOverlayClick(object sender, GoogleMap.GroundOverlayClickEventArgs e)
         {
             // clicked ground overlay
             var nativeItem = e.GroundOverlay;
@@ -110,15 +111,15 @@ namespace Xamarin.Forms.GoogleMaps.Logics.Android
 
         internal override void OnUpdateBounds(GroundOverlay outerItem, NativeGroundOverlay nativeItem)
         {
-            nativeItem.SetPositionFromBounds(outerItem.Bounds.ToLatLngBounds()); 
+            nativeItem.SetPositionFromBounds(outerItem.Bounds.ToLatLngBounds());
         }
 
-        internal override void OnUpdateIcon(GroundOverlay outerItem, NativeGroundOverlay nativeItem)
+        internal override async void OnUpdateIcon(GroundOverlay outerItem, NativeGroundOverlay nativeItem)
         {
             if (outerItem.Icon != null && outerItem.Icon.Type == BitmapDescriptorType.View)
             {
                 // If the pin has an IconView set this method will convert it into an icon for the marker
-                TransformXamarinViewToAndroidBitmap(outerItem, nativeItem);
+                await TransformXamarinViewToAndroidBitmap(outerItem, nativeItem);
             }
             else
             {
@@ -143,7 +144,7 @@ namespace Xamarin.Forms.GoogleMaps.Logics.Android
             nativeItem.ZIndex = outerItem.ZIndex;
         }
 
-        private async void TransformXamarinViewToAndroidBitmap(GroundOverlay outerItem, NativeGroundOverlay nativeItem)
+        private async Task TransformXamarinViewToAndroidBitmap(GroundOverlay outerItem, NativeGroundOverlay nativeItem)
         {
             if (outerItem?.Icon?.Type == BitmapDescriptorType.View && outerItem.Icon?.View != null)
             {
@@ -154,13 +155,14 @@ namespace Xamarin.Forms.GoogleMaps.Logics.Android
                     Platform.Android.Platform.CreateRendererWithContext(iconView, _context));
                 var otherView = new FrameLayout(nativeView.Context);
                 nativeView.LayoutParameters = new FrameLayout.LayoutParams(Utils.DpToPx((float)iconView.WidthRequest), Utils.DpToPx((float)iconView.HeightRequest));
+
+                var img = await Utils.ConvertViewToBitmapDescriptor(otherView);
+                
                 otherView.AddView(nativeView);
-                nativeItem.SetImage(await Utils.ConvertViewToBitmapDescriptor(otherView));
+                nativeItem.SetImage(img);
                 //nativeItem.SetAnchor((float)iconView.AnchorX, (float)iconView.AnchorY);
                 nativeItem.Visible = true;
             }
         }
     }
 }
-
-

@@ -31,7 +31,7 @@ namespace Xamarin.Forms.GoogleMaps.Logics.Android
             Context context,
             IBitmapDescriptorFactory bitmapDescriptorFactory,
             Action<Pin, MarkerOptions> onMarkerCreating,
-            Action<Pin, Marker> onMarkerCreated, 
+            Action<Pin, Marker> onMarkerCreated,
             Action<Pin, Marker> onMarkerDeleting,
             Action<Pin, Marker> onMarkerDeleted)
         {
@@ -93,7 +93,7 @@ namespace Xamarin.Forms.GoogleMaps.Logics.Android
             {
                 var factory = _bitmapDescriptorFactory ?? DefaultBitmapDescriptorFactory.Instance;
                 var nativeDescriptor = factory.ToNative(outerItem.Icon);
-                opts.SetIcon(nativeDescriptor);
+                opts = opts.SetIcon(nativeDescriptor);
             }
 
             _onMarkerCreating(outerItem, opts);
@@ -132,12 +132,12 @@ namespace Xamarin.Forms.GoogleMaps.Logics.Android
             return marker;
         }
 
-        Pin LookupPin(Marker marker)
+        private Pin LookupPin(Marker marker)
         {
             return GetItems(Map).FirstOrDefault(outerItem => ((Marker)outerItem.NativeObject).Id == marker.Id);
         }
 
-        void OnInfoWindowClick(object sender, GoogleMap.InfoWindowClickEventArgs e)
+        private void OnInfoWindowClick(object sender, GoogleMap.InfoWindowClickEventArgs e)
         {
             // lookup pin
             var targetPin = LookupPin(e.Marker);
@@ -165,7 +165,7 @@ namespace Xamarin.Forms.GoogleMaps.Logics.Android
             }
         }
 
-        void OnMakerClick(object sender, GoogleMap.MarkerClickEventArgs e)
+        private void OnMakerClick(object sender, GoogleMap.MarkerClickEventArgs e)
         {
             // lookup pin
             var targetPin = LookupPin(e.Marker);
@@ -192,7 +192,7 @@ namespace Xamarin.Forms.GoogleMaps.Logics.Android
             e.Handled = false;
         }
 
-        void OnInfoWindowClose(object sender, GoogleMap.InfoWindowCloseEventArgs e)
+        private void OnInfoWindowClose(object sender, GoogleMap.InfoWindowCloseEventArgs e)
         {
             // lookup pin
             var targetPin = LookupPin(e.Marker);
@@ -209,7 +209,7 @@ namespace Xamarin.Forms.GoogleMaps.Logics.Android
             }
         }
 
-        void OnMarkerDragStart(object sender, GoogleMap.MarkerDragStartEventArgs e)
+        private void OnMarkerDragStart(object sender, GoogleMap.MarkerDragStartEventArgs e)
         {
             // lookup pin
             _draggingPin = LookupPin(e.Marker);
@@ -221,7 +221,7 @@ namespace Xamarin.Forms.GoogleMaps.Logics.Android
             }
         }
 
-        void OnMarkerDrag(object sender, GoogleMap.MarkerDragEventArgs e)
+        private void OnMarkerDrag(object sender, GoogleMap.MarkerDragEventArgs e)
         {
             if (_draggingPin != null)
             {
@@ -230,7 +230,7 @@ namespace Xamarin.Forms.GoogleMaps.Logics.Android
             }
         }
 
-        void OnMarkerDragEnd(object sender, GoogleMap.MarkerDragEndEventArgs e)
+        private void OnMarkerDragEnd(object sender, GoogleMap.MarkerDragEndEventArgs e)
         {
             if (_draggingPin != null)
             {
@@ -251,7 +251,7 @@ namespace Xamarin.Forms.GoogleMaps.Logics.Android
             }
         }
 
-        void UpdateSelectedPin(Pin pin)
+        private void UpdateSelectedPin(Pin pin)
         {
             if (pin == null)
             {
@@ -268,7 +268,7 @@ namespace Xamarin.Forms.GoogleMaps.Logics.Android
             }
         }
 
-        void UpdatePositionWithoutMove(Pin pin, Position position)
+        private void UpdatePositionWithoutMove(Pin pin, Position position)
         {
             try
             {
@@ -320,8 +320,8 @@ namespace Xamarin.Forms.GoogleMaps.Logics.Android
             {
                 var iconView = outerItem.Icon.View;
                 var nativeView = await Utils.ConvertFormsToNative(
-                    iconView, 
-                    new Rectangle(0, 0, (double)Utils.DpToPx((float)iconView.WidthRequest), (double)Utils.DpToPx((float)iconView.HeightRequest)), 
+                    iconView,
+                    new Rectangle(0, 0, (double)Utils.DpToPx((float)iconView.WidthRequest), (double)Utils.DpToPx((float)iconView.HeightRequest)),
                     Platform.Android.Platform.CreateRendererWithContext(iconView, _context));
                 var otherView = new FrameLayout(nativeView.Context);
                 nativeView.LayoutParameters = new FrameLayout.LayoutParams(Utils.DpToPx((float)iconView.WidthRequest), Utils.DpToPx((float)iconView.HeightRequest));
@@ -330,9 +330,12 @@ namespace Xamarin.Forms.GoogleMaps.Logics.Android
                 var icon = await Utils.ConvertViewToBitmapDescriptor(otherView);
                 if (outerItem.NativeObject != null)
                 {
+                    //Device.BeginInvokeOnMainThread(() =>
+                    //{
                     nativeItem.SetIcon(icon);
                     nativeItem.SetAnchor((float)iconView.AnchorX, (float)iconView.AnchorY);
                     nativeItem.Visible = true;
+                    //});
                 }
             }
         }
@@ -357,6 +360,7 @@ namespace Xamarin.Forms.GoogleMaps.Logics.Android
                 Map.SelectedPin = null;
             }
         }
+
         protected override void OnUpdateAnchor(Pin outerItem, Marker nativeItem)
         {
             nativeItem.SetAnchor((float)outerItem.Anchor.X, (float)outerItem.Anchor.Y);
@@ -369,7 +373,7 @@ namespace Xamarin.Forms.GoogleMaps.Logics.Android
 
         protected override void OnUpdateInfoWindowAnchor(Pin outerItem, Marker nativeItem)
         {
-            nativeItem.SetInfoWindowAnchor((float) outerItem.InfoWindowAnchor.X, (float) outerItem.InfoWindowAnchor.Y);
+            nativeItem.SetInfoWindowAnchor((float)outerItem.InfoWindowAnchor.X, (float)outerItem.InfoWindowAnchor.Y);
         }
 
         protected override void OnUpdateZIndex(Pin outerItem, Marker nativeItem)
@@ -383,4 +387,3 @@ namespace Xamarin.Forms.GoogleMaps.Logics.Android
         }
     }
 }
-

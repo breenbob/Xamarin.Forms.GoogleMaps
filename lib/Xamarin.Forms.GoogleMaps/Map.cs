@@ -56,13 +56,13 @@ namespace Xamarin.Forms.GoogleMaps
         public static readonly BindableProperty NewCameraUpdateProperty = BindableProperty.Create(
             nameof(NewCameraUpdate), typeof(CameraUpdate), typeof(Map),
             null,
-            propertyChanged: (bindable, oldValue, newValue) =>
+            propertyChanged: async (bindable, oldValue, newValue) =>
             {
                 var cameraUpdate = newValue as CameraUpdate;
 
                 if (bindable != null && cameraUpdate != null)
                 {
-                    ((Map)bindable).MoveCamera(cameraUpdate);
+                    var result = await ((Map)bindable).MoveCamera(cameraUpdate);
                 }
             });
 
@@ -604,9 +604,12 @@ namespace Xamarin.Forms.GoogleMaps
 
             _pins.Clear();
 
-            foreach (var pin in newItemsSource)
+            if (newItemsSource != null)
             {
-                _pins.Add(pin);
+                foreach (var pin in newItemsSource)
+                {
+                    _pins.Add(pin);
+                }
             }
         }
 

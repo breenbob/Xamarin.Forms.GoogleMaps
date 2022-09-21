@@ -14,7 +14,7 @@ using System.Collections.Concurrent;
 
 namespace Xamarin.Forms.GoogleMaps.Android
 {
-    class Utils
+    internal class Utils
     {
         /// <summary>
         /// convert from dp to pixels
@@ -36,10 +36,11 @@ namespace Xamarin.Forms.GoogleMaps.Android
             return px / metrics.Density;
         }
 
-        public static Task<ViewGroup> ConvertFormsToNative(View view, Rectangle size, IVisualElementRenderer vRenderer)
+        public static Task<global::Android.Views.View> ConvertFormsToNative(View view, Rectangle size, IVisualElementRenderer vRenderer)
         {
-            return Task.Run(() => {
-                var viewGroup = vRenderer.ViewGroup;
+            return Task.Run(() =>
+            {
+                var viewGroup = vRenderer.View;
                 vRenderer.Tracker.UpdateLayout();
                 var layoutParams = new ViewGroup.LayoutParams((int)size.Width, (int)size.Height);
                 viewGroup.LayoutParameters = layoutParams;
@@ -53,16 +54,14 @@ namespace Xamarin.Forms.GoogleMaps.Android
         public static Bitmap ConvertViewToBitmap(global::Android.Views.View v)
         {
             v.SetLayerType(LayerType.Hardware, null);
-            v.DrawingCacheEnabled = true;
-
             v.Measure(global::Android.Views.View.MeasureSpec.MakeMeasureSpec(0, MeasureSpecMode.Unspecified),
                 global::Android.Views.View.MeasureSpec.MakeMeasureSpec(0, MeasureSpecMode.Unspecified));
             v.Layout(0, 0, v.MeasuredWidth, v.MeasuredHeight);
 
-            v.BuildDrawingCache(true);
-            Bitmap b = Bitmap.CreateBitmap(v.GetDrawingCache(true));
-            v.DrawingCacheEnabled = false; // clear drawing cache
-            return b;
+            var bitmap = Bitmap.CreateBitmap(v.Width, v.Height, Bitmap.Config.Argb8888);
+            var canvas = new Canvas(bitmap);
+            v.Draw(canvas);
+            return bitmap;
         }
 
         private static LinkedList<string> lruTracker = new LinkedList<string>();
@@ -70,43 +69,43 @@ namespace Xamarin.Forms.GoogleMaps.Android
 
         public static Task<global::Android.Gms.Maps.Model.BitmapDescriptor> ConvertViewToBitmapDescriptor(global::Android.Views.View v)
         {
-            return Task.Run(() => {
-
+            return Task.Run(() =>
+            {
                 var bmp = ConvertViewToBitmap(v);
                 var img = global::Android.Gms.Maps.Model.BitmapDescriptorFactory.FromBitmap(bmp);
 
-                var buffer = ByteBuffer.Allocate(bmp.ByteCount);
-                bmp.CopyPixelsToBuffer(buffer);
-                buffer.Rewind();
+                //var buffer = ByteBuffer.Allocate(bmp.ByteCount);
+                //bmp.CopyPixelsToBuffer(buffer);
+                //buffer.Rewind();
 
-                // https://forums.xamarin.com/discussion/5950/how-to-convert-from-bitmap-to-byte-without-bitmap-compress
-                IntPtr classHandle = JNIEnv.FindClass("java/nio/ByteBuffer");
-                IntPtr methodId = JNIEnv.GetMethodID(classHandle, "array", "()[B");
-                IntPtr resultHandle = JNIEnv.CallObjectMethod(buffer.Handle, methodId);
-                byte[] bytes = JNIEnv.GetArray<byte>(resultHandle);
-                JNIEnv.DeleteLocalRef(resultHandle);
+                //// https://forums.xamarin.com/discussion/5950/how-to-convert-from-bitmap-to-byte-without-bitmap-compress
+                //IntPtr classHandle = JNIEnv.FindClass("java/nio/ByteBuffer");
+                //IntPtr methodId = JNIEnv.GetMethodID(classHandle, "array", "()[B");
+                //IntPtr resultHandle = JNIEnv.CallObjectMethod(buffer.Handle, methodId);
+                //byte[] bytes = JNIEnv.GetArray<byte>(resultHandle);
+                //JNIEnv.DeleteLocalRef(resultHandle);
 
-                var sha = MD5.Create();
-                var hash = Convert.ToBase64String(sha.ComputeHash(bytes));
+                //var sha = MD5.Create();
+                //var hash = Convert.ToBase64String(sha.ComputeHash(bytes));
 
-                var exists = cache.ContainsKey(hash);
-                lock (lruTracker)
-                {//LinkedList is not thread safe impl, will crash in multi-trheads scenerios, and so using lock to work-around
-                    if (exists)
-                    {
-                        lruTracker.Remove(hash);
-                        lruTracker.AddLast(hash);
-                        return cache[hash];
-                    }
-                    if (lruTracker.Count > 10) // O(1)
-                    {
-                        global::Android.Gms.Maps.Model.BitmapDescriptor tmp;
-                        cache.TryRemove(lruTracker.First.Value, out tmp);
-                        lruTracker.RemoveFirst();
-                    }
-                    lruTracker.AddLast(hash);
-                }//lock lruTracker
-                cache.GetOrAdd(hash, img);
+                //var exists = cache.ContainsKey(hash);
+                //lock (lruTracker)
+                //{//LinkedList is not thread safe impl, will crash in multi-trheads scenerios, and so using lock to work-around
+                //    if (exists)
+                //    {
+                //        lruTracker.Remove(hash);
+                //        lruTracker.AddLast(hash);
+                //        return cache[hash];
+                //    }
+                //    if (lruTracker.Count > 10) // O(1)
+                //    {
+                //        global::Android.Gms.Maps.Model.BitmapDescriptor tmp;
+                //        cache.TryRemove(lruTracker.First.Value, out tmp);
+                //        lruTracker.RemoveFirst();
+                //    }
+                //    lruTracker.AddLast(hash);
+                //}//lock lruTracker
+                //cache.GetOrAdd(hash, img);
                 return img;
             });
         }
@@ -119,7 +118,5 @@ namespace Xamarin.Forms.GoogleMaps.Android
             layout.AddView(view);
             return layout;
         }
-
     }
 }
-

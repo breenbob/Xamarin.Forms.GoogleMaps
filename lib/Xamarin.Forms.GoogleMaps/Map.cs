@@ -988,14 +988,26 @@ namespace Xamarin.Forms.GoogleMaps
 
         private void CreatePinItems()
         {
-            if (ItemsSource == null || (ItemTemplate == null && ItemTemplateSelector == null))
+            if ((ItemsSource == null || (ItemTemplate == null && ItemTemplateSelector == null))
+                && PinItems == null)
             {
                 return;
             }
 
-            foreach (object item in ItemsSource)
+            if (ItemsSource != null)
             {
-                CreatePin(item);
+                foreach (object item in ItemsSource)
+                {
+                    CreatePin(item);
+                }
+            }
+
+            if (PinItems != null)
+            {
+                foreach (Pin item in PinItems)
+                {
+                    CreatePin(item);
+                }
             }
         }
 
